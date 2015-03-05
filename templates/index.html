@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>EOH PROJECT 2015</title>
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    	<meta charset="utf-8">
+    	<style>
+	      html, body, #map-canvas {
+	        height: 100%;
+	        margin: 0px;
+	        padding: 0px
+	      }
+	    </style>
+	    
+		<link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/bootstrap.css') }}">
+		<link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/bootstrap-theme.css') }}">
+		
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+		<script src="{{ url_for('static', filename='bootstrap/bootstrap.js') }}"></script>
+		<script src="{{ url_for('static', filename='index.js') }}"></script>
+		<script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
+	</head>
+
+	<body>
+		<div id='map-canvas'></div>
+	</body>
+</html>
