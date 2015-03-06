@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+		<meta name="description" content="">
+		<meta name="author" content="">
+		<link rel="icon" href="../../favicon.ico">
+
+		<title>EOH Project 2015</title>
+
+		<!-- Bootstrap core CSS -->
+		<link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/bootstrap.css') }}">
+
+		<!-- Custom styles for this template -->
+		<link href="{{ url_for('static', filename='bootstrap/justified-nav.css') }}" rel="stylesheet">
+		{% block additional_css %}
+		{% endblock %}
+	</head>
+
+ 	<body>
+
+		<div class="container">
+			<p class="navbar-right">
+				{% if name %}
+		       		Hello, <a href="/users/{{ username }}" class="navbar-link">{{ name }}</a> | <a href="/logout">Logout</a>
+				{% else %}
+				  	<a href="/login">Login</a>
+				{% endif %}
+			</p>
+
+		 	<!-- The justified navigation menu is meant for single line per list item.
+			   Multiple lines will require custom code not provided by Bootstrap. -->
+		  	<div class="masthead">
+				<h3 class="text-muted">(Project name)</h3>
+				<nav>
+			  		<ul class="nav nav-justified">
+						<li><a href="/index" data-toggle="tab">Home</a></li>
+						<li><a href="#" data-toggle="tab">Projects</a></li>
+						<li><a href="#" data-toggle="tab">Services</a></li>
+						<li><a href="#" data-toggle="tab">Downloads</a></li>
+						<li><a href="#" data-toggle="tab">About</a></li>
+						<li><a href="#" data-toggle="tab">Contact</a></li>
+			  		</ul>
+				</nav>
+		  	</div>
+	  	</div> <!-- /container -->
+
+	  	<div class="container-fluid">
+		  	{% block content %}
+			{% endblock %}
+
+			<!-- Site footer -->
+			<footer class="footer">
+				<p>&copy; Company 2014</p>
+			</footer>
+		</div>
+		
+
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+		<script src="{{ url_for('static', filename='bootstrap/bootstrap.js') }}"></script>
+		{% block additional_javascript %}
+		{% endblock %}
+  	</body>
+</html>

@@ -1,0 +1,66 @@
+{% extends 'template.html' %}
+
+{% block content %}
+<div class="row">
+	<div class="col-sm-2 col-sm-offset-1">
+		<ul class="nav nav-pills nav-stacked">
+			<li class="active" data-toggle="tab"><a href="">Maps</a></li>
+			<li data-toggle="tab"><a href="">Profile</a></li>
+			<li data-toggle="tab"><a href="">Account Settings</a></li>
+		</ul>
+	</div>
+	<div class="col-sm-8">
+		<div class="panel panel-primary" id="maps-panel">
+			<div class="panel-heading">
+				<h3 class="panel-title">Your Maps</h3>
+			</div>
+			<div class="panel-body">
+				No maps saved
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-sm-2 col-sm-offset-5">
+				<button type="button" class="btn btn-success" data-toggle="modal" data-target="#new-map-modal">Create a new map</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="newMapModalLabel" aria-hidden="true" id="new-map-modal">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title" id="newMapModalLabel">New Map</h4>
+			</div>
+			<div class="modal-body">
+				<form class="form-horizontal" action="/users/{{ username }}/upload" method="POST" enctype="multipart/form-data">
+					<div class="form-group">
+						<label for="mapName" class="col-sm-2 control-label">Name</label>
+						<div class="col-sm-8">
+							<input type="text" class="form-control" id="mapName">
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="pictureUpload" class="col-sm-2 control-label">Upload pictures</label>
+						<div class="col-sm-8">
+							<input type="file" multiple="" name="file[]">
+							<p class="help-block">Accepted formats: png, jpeg, jpg</p>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="sensorUpload" class="col-sm-2 control-label">Upload device readings</label>
+						<div class="col-sm-8">
+							<input type="file">
+							<p class="help-block">Accepted format: don't know yet</p>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<input type="submit" value="Create" class="btn btn-primary">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
