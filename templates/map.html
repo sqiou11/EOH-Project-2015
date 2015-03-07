@@ -20,6 +20,11 @@
 	</head>
 
 	<body>
+		<script>
+			var geojson_file = "{{url_for('get_geojson_file', username=username, filename=geoJSONFile)}}";
+			var username = '{{username | safe}}';
+		</script>
+
 		<div id='map-canvas'></div>
 
 

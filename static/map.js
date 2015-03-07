@@ -1,87 +1,65 @@
-var poly;
 var map;
+var geojson;
 
-function initialize() {
-  var mapOptions = {
-    zoom: 10,
-    // Center the map on Chicago, USA.
-    center: new google.maps.LatLng(41.879535, -87.624333)
-  };
-
-  map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
-
-  var polyOptions = {
-    strokeColor: '#0066FF',
-    strokeOpacity: 1.0,
-    strokeWeight: 5
-  };
-  poly = new google.maps.Polyline(polyOptions);
-  poly.setMap(map);
-
-  // Try HTML5 geolocation
-  if(navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(function(position) {
-      var pos = new google.maps.LatLng(position.coords.latitude,
-                                       position.coords.longitude);
-
-      var infowindow = new google.maps.InfoWindow({
-        map: map,
-        position: pos,
-        content: 'Location found using HTML5.'
-      });
-
-      map.setCenter(pos);
-    }, function() {
-      handleNoGeolocation(true);
+function initMap() {
+    // set up the map
+    map = new google.maps.Map(document.getElementById('map-canvas'), {
+        center: new google.maps.LatLng(0, 0),
+        zoom: 2
     });
-  } else {
-    // Browser doesn't support Geolocation
-    handleNoGeolocation(false);
-  }
 
-  // Add a listener for the click event
-  google.maps.event.addListener(map, 'click', addLatLng);
-}
+    map.data.addGeoJson(geojson);
 
-function handleNoGeolocation(errorFlag) {
-  if (errorFlag) {
-    var content = 'Error: The Geolocation service failed.';
-  } else {
-    var content = 'Error: Your browser doesn\'t support geolocation.';
-  }
+    map.data.setStyle(function(feature) {
+        return {
+            icon: {
+                scaledSize: new google.maps.Size(100, 100),
+                url: '/users/' + username + '/images/' + feature.getProperty('image')
+            }
+        };
+    });
 
-  var options = {
-    map: map,
-    position: new google.maps.LatLng(60, 105),
-    content: content
-  };
-
-  var infowindow = new google.maps.InfoWindow(options);
-  map.setCenter(options.position);
+    zoom(map);
 }
 
 /**
- * Handles click events on a map, and adds a new point to the Polyline.
- * @param {google.maps.MouseEvent} event
+ * Update a map's viewport to fit each geometry in a dataset
+ * @param {google.maps.Map} map The map to adjust
  */
-function addLatLng(event) {
+function zoom(map) {
+    var bounds = new google.maps.LatLngBounds();
+    map.data.forEach(function(feature) {
+        processPoints(feature.getGeometry(), bounds.extend, bounds);
+    });
+    map.fitBounds(bounds);
+}
 
-  var path = poly.getPath();
-
-  // Because path is an MVCArray, we can simply append a new coordinate
-  // and it will automatically appear.
-  path.push(event.latLng);
-
-  // Add a new marker at the new plotted point on the polyline.
-  /*var marker = new google.maps.Marker({
-    position: event.latLng,
-    title: '#' + path.getLength(),
-    map: map
-  });*/
+/**
+ * Process each point in a Geometry, regardless of how deep the points may lie.
+ * @param {google.maps.Data.Geometry} geometry The structure to process
+ * @param {function(google.maps.LatLng)} callback A function to call on each
+ *     LatLng point encountered (e.g. Array.push)
+ * @param {Object} thisArg The value of 'this' as provided to 'callback' (e.g.
+ *     myArray)
+ */
+function processPoints(geometry, callback, thisArg) {
+    if (geometry instanceof google.maps.LatLng) {
+        callback.call(thisArg, geometry);
+    } else if (geometry instanceof google.maps.Data.Point) {
+        callback.call(thisArg, geometry.get());
+    } else {
+        geometry.getArray().forEach(function(g) {
+            processPoints(g, callback, thisArg);
+        });
+    }
 }
 
 $(document).ready(function() {
-  google.maps.event.addDomListener(window, 'load', initialize);
+    //convert the passed in file into a json object to add to the map, loading the file directly won't work with zoom for some reason
+    $.getJSON(geojson_file, function(response) { 
+        geojson = response; 
+    })
+    google.maps.event.addDomListener(window, 'load', initMap);
 });
 
 
