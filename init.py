@@ -3,7 +3,7 @@ import sqlite3, os
 from werkzeug import secure_filename
 from GPSFromExif import get_lat_lon, get_exif_data
 from PIL import Image
-import geojson, json
+import geojson, json, shutil
 from ImageHandler import mergeSort
 
 app = Flask(__name__)
@@ -40,12 +40,13 @@ def close_connection(exception):
         db.close()
 
 def query_db(query, args=(), one=False):
-	db = get_db()
-	db.row_factory = make_dicts
-	cur = db.execute(query, args)
-	rv = cur.fetchall()
-	cur.close()
-	return (rv[0] if rv else None) if one else rv
+    db = get_db()
+    db.row_factory = make_dicts
+    cur = db.execute(query, args)
+    db.commit()
+    rv = cur.fetchall()
+    cur.close()
+    return (rv[0] if rv else None) if one else rv
 
 def insert(table, fields=(), values=()):
 	db = get_db()
@@ -62,16 +63,26 @@ def insert(table, fields=(), values=()):
 def cover():
     return render_template("cover.html")
 
+#index page
 @app.route('/index')
 def index():
 	if 'name' in session:
 		return render_template("index.html", name=escape(session['name']), username=escape(session['username']))
 	return render_template("index.html")
 
+#project page
+@app.route('/project')
+def project():
+    if 'name' in session:
+        return render_template("project.html", name=escape(session['name']), username=escape(session['username']))
+    return render_template("project.html")
+
+#register page
 @app.route('/register')
 def register():
 	return render_template("register.html")
 
+#login page
 @app.route('/login', methods=['GET', 'POST'])
 def login():
 	if request.method == 'POST':
@@ -107,6 +118,14 @@ def upload(username):
     image_locations = []
     features = []
     lineString_coords = []
+
+    folder = str(app.config['IMAGE_FOLDER'] + '/' + username + '/' + request.form['mapName'])
+    #if user's map folder exists, delete it
+    if os.path.exists(folder):
+        shutil.rmtree(folder)
+    os.makedirs(folder)
+    query_db('delete from images where username = ? and mapName = ?', [username, request.form['mapName']], one=False)
+
     for file in uploaded_files:
         # Check if the file is one of the allowed types/extensions
         if file and allowed_file(file.filename):
@@ -114,27 +133,31 @@ def upload(username):
             filename = secure_filename(file.filename)
             # Move the file form the temporal folder to the upload
             # folder we setup
-            location = os.path.join(app.config['IMAGE_FOLDER'], filename)
+            
+            location = os.path.join(folder, filename)
             file.save(location)
 
             #prevent duplicate inserts by first checking if an identical record exists (same username, map name, and location)
-            prevUpload = query_db('select * from images where username = ? and mapName = ? and fileName = ?', [username, request.form['mapName'], filename], one=True)
-            if not prevUpload:
-            	insert('images', ['username', 'mapName', 'fileName', 'fileLocation'], [username, request.form['mapName'], filename, location])
+            insert('images', ['username', 'mapName', 'fileName', 'fileLocation'], [username, request.form['mapName'], filename, location])
 
             image_locations.append(location)
 
     image_locations = mergeSort(image_locations)
+    image_id = 1
+    prevCoords = (None, None)
+
     for loc in image_locations:
     	img = Image.open(loc)
-    	coords = get_lat_lon(get_exif_data(img))
+    	exif = get_exif_data(img)
+    	coords = get_lat_lon(exif)
     	if coords.count(None) != len(coords):
     		point = geojson.Point(coords)
-    		features.append(geojson.Feature(geometry=point, properties={ 'image': loc[len(app.config['IMAGE_FOLDER'])+1:] }))
-    		#add each coord to our Line that will connect them all
-    		lineString_coords.append(coords)
-
-    features.append(geojson.Feature(geometry=geojson.LineString(lineString_coords)))
+    		features.append(geojson.Feature(geometry=point, id=image_id, properties={ 'image': loc[len(app.config['IMAGE_FOLDER'])+1:], 'timestamp': exif['DateTime'], 'gps': coords, 'orientation': exif['Orientation'] }))
+    		#if there was a previous point, create a line connecting this point with the previous point
+    		if prevCoords.count(None) != len(coords):
+    			features.append(geojson.Feature(geometry=geojson.LineString([prevCoords, coords]), properties={ 'average': None}))
+    		prevCoords = coords
+    		image_id += 1
 
     #create featureCollection obj with the feature array we made
     featureCollection = geojson.FeatureCollection(features)
@@ -154,7 +177,6 @@ def upload(username):
 @app.route('/users/<username>/maps/<mapName>')
 def display_map(username, mapName):
 	mapCursor = query_db('select * from maps where username = ? and mapName = ?', [username, mapName], one=True)
-	print mapCursor
 	return render_template('map.html', username=username, mapName=mapName, geoJSONFile=mapCursor['fileName'])
 
 #urls used to retrieve images and geojson files
@@ -162,9 +184,21 @@ def display_map(username, mapName):
 def get_geojson_file(username, filename):
 	return send_from_directory(app.config['GEOJSON_FOLDER'], filename)
 
-@app.route('/users/<username>/images/<filename>')
-def get_image(username, filename):
-	return send_from_directory(app.config['IMAGE_FOLDER'], filename)
+@app.route('/images/<username>/<mapName>/<filename>')
+def get_image(username, mapName, filename):
+	return send_from_directory(app.config['IMAGE_FOLDER'] + '/' + username + '/' + mapName, filename)
+
+@app.route('/delete/<username>/<mapName>')
+def delete_map(username, mapName):
+    #delete the actual folder and all its contents
+    folder = str(app.config['IMAGE_FOLDER'] + '/' + username + '/' + mapName)
+    if os.path.exists(folder):
+        shutil.rmtree(folder)
+    #delete all image records associated with that map
+    query_db('delete from images where username = ? and mapName = ?', [username, mapName], one=False)
+    #delete map record from db as well
+    query_db('delete from maps where username = ? and mapName = ?', [username, mapName], one=False)
+    return redirect(url_for('userMainPage', username=username))
 
 if __name__ == "__main__":
     app.run(debug = True)

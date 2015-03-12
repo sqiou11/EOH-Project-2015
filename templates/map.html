@@ -5,11 +5,15 @@
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     	<meta charset="utf-8">
     	<style>
-	      html, body, #map-canvas {
-	        height: 100%;
-	        margin: 0px;
-	        padding: 0px
-	      }
+			html, body, #map-canvas {
+				height: 100%;
+				margin: 0px;
+				padding: 0px
+			}
+			img {
+				height: auto;
+				width: 100%;
+			}
 	    </style>
 	    
 		<link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/bootstrap.css') }}">
@@ -24,6 +28,28 @@
 			var geojson_file = "{{url_for('get_geojson_file', username=username, filename=geoJSONFile)}}";
 			var username = '{{username | safe}}';
 		</script>
+
+		<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true" id="image-modal">
+			<div class="modal-dialog modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						<h4 class="modal-title" id="imageModalLabel">Image Name</h4>
+					</div>
+					<div class="modal-body">
+						<img src="#" alt="#" id="clickedImage">
+						<br><br>
+						<h4><b>Details</b></h4>
+						<p id="dateTime"></p>
+						<p id="GPS"></p>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-primary pull-left" id="prevImageBtn"><span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span></button>
+						<button type="button" class="btn btn-primary pull-right" id="nextImageBtn"><span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span></button>
+					</div>
+				</div>
+			</div>
+		</div>
 
 		<div id='map-canvas'></div>
 
