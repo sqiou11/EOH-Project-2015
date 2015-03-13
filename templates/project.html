@@ -1,6 +1,28 @@
 {% extends 'template.html' %}
 
 {% block content %}
-<h1 class="text-center">The Project</h1>
-Details about the project go here
+<div class="container">
+	<div class="jumbotron">
+		<h1 class="text-center">The Project</h1>
+		<p class="lead">An Engineering Open House exhibit by Steven Qiou and Joey Varikooty</p>
+	</div>
+	<div class="row">
+		<h2 class="text-center"><b>How the web application works</b></h2>
+		<br>
+		<p class="lead"><img src="{{ url_for('static', filename='flask_screenshot.png') }}" style="height: 350px; float: left; padding-right: 20px">The website you see here is built using HTML, CSS, and JavaScript with a Flask backend.  Users will create their own account through which they can begin creating and saving maps.  Creating a map is easy.  Just upload as many pictures as you'd like that are taken from a smartphone with GPS tagging enabled and upload the sensor readings file recorded by the Smart Sole Android app.  It's that easy.  The Flask server will then create a GeoJSON file comprised of all GPS coordinates recorded by the Android app, as well as all of your images and any recorded sensor information matching the timestamps of those images.  Loading this GeoJSON file about your physiological state as you took each picture.</p>
+		<br>
+		<p class="lead">All maps are saved by the local server and can be revisited anytime.  Records of uploaded images, user accounts, and created maps are all stored in an SQL database. </p>
+	</div>
+	<br>
+	<div class="row">
+		<h2 class="text-center"><b>How the device works</b></h2>
+		<br>
+	</div>
+	<br>
+	<div>
+		<h2 class="text-center"><b>How the Android app works</b></h2>
+		<br>
+		<p><img src="{{ url_for('static', filename='android_studio_screenshot.png') }}" style="height: 300px; float: left; padding-right: 20px">
+	</div>
+</div>
 {% endblock %}

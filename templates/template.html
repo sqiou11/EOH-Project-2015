@@ -9,7 +9,7 @@
 		<meta name="author" content="">
 		<link rel="icon" href="../../favicon.ico">
 
-		<title>EOH Project 2015</title>
+		<title>Smart Sole</title>
 
 		<!-- Bootstrap core CSS -->
 		<link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/bootstrap.css') }}">
@@ -26,7 +26,7 @@
 				{% if name %}
 		       		Hello, <a href="/users/{{ username }}" class="navbar-link">{{ name }}</a> | <a href="/logout">Logout</a>
 				{% else %}
-				  	<a href="/login">Login</a>
+				  	<a href="/login">Login</a> | <a href="/register">Register</a>
 				{% endif %}
 			</p>
 		</div>
@@ -37,7 +37,7 @@
 				 	<!-- The justified navigation menu is meant for single line per list item.
 					   Multiple lines will require custom code not provided by Bootstrap. -->
 					<div class="col-sm-4">
-						<h3 class="brand-name">(Project name)</h3>
+						<h2 class="brand-name">Smart Sole</h2>
 					</div>
 					<div class="col-sm-8">
 						<nav>
@@ -57,10 +57,12 @@
 	  	{% block content %}
 		{% endblock %}
 
-		<!-- Site footer -->
-		<footer class="footer">
-			<p>&copy; Company 2014</p>
-		</footer>
+		<div class="container">
+			<!-- Site footer -->
+			<footer class="footer">
+				<p>&copy; Company 2014</p>
+			</footer>
+		</div>
 		
 
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>

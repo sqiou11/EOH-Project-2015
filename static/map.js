@@ -51,6 +51,7 @@ function displayModal(feature) {
 
     $('#image-modal').find('#dateTime').text("Date and time: " + feature.getProperty('timestamp'));
     $('#image-modal').find('#GPS').text("GPS Coordinates: " + feature.getProperty('gps')[0] + ', ' + feature.getProperty('gps')[1]);
+    $('#image-modal').find('#EDA').text("EDA Peaks per Second: " + feature.getProperty('peaksPerSecond'));
     currFeatureID = feature.getId();
 
     if(map.data.getFeatureById(currFeatureID+1) == undefined) {
